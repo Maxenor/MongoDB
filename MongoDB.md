@@ -1,4 +1,5 @@
-﻿# Semaine Mongo DB
+
+# Semaine Mongo DB
 
 ## Introduction
 
@@ -44,17 +45,17 @@ db.salles.find({"styles.0": {$eq: "blues"}}, {"styles":1})
 Permet de trouver les salles qui ont en 1ere position dans le tableau styles "blues"
 
 ### Exo 7 
-db.salles.find( { "codePostal": { "\$regex": "^84" }, "capacite": { "\$lt": 500 } }, { "ville": 1 } )
+db.salles.find( { "codePostal": { "$regex": "^84" }, "capacite": { "$lt": 500 } }, { "ville": 1 } )
 
 Permet de voir les villes qui ont un code postal commençant par 84 et avec une capacité inférieure a 500
 
 ### Exo 8
 
-db.salles.find({ \$or : [ {"avis": {\$exists: false}}, {"_id": {$mod: [2, 0]}}]}, {"nom": 1})
+db.salles.find({ $or : [ {"avis": {$exists: false}}, {"_id": {$mod: [2, 0]}}]}, {"nom": 1})
 Permet de chercher les salles qui ont un id pair et pas d'avis
 
 ### Exo 9
-db.salles.find({"avis.note": {\$gte :8}, "avis.note": {\$lte: 10}}, {"_id": 1})
+db.salles.find({"avis.note": {$gte :8}, "avis.note": {$lte: 10}}, {"_id": 1})
 Permet de trouver les salles dont les avis sont compris entre 8 et 1 inclus
 
 ### Exo 10
@@ -63,7 +64,7 @@ db.salles.find({"avis.date": {$gt: ISODate("2019-11-15")}}, {"nom": 1})
 Permet de trouver les salles qui ont un avis datant d'avant le 15 11 2019.
 
 ### Exo 11
-db.salles.find({\$expr: {\$gt: [{\$multiply: ["\$_id", 100]}, "$capacite"]}}, {nom: 1, capacite: 1})
+db.salles.find({$expr: {$gt: [{$multiply: ["$_id", 100]}, "$capacite"]}}, {nom: 1, capacite: 1})
 Permet d'avoir les salles dont l'id multiplié par 100 est supérieur a la capacité
 
 ### Exo 12
@@ -78,20 +79,60 @@ db.salles.updateMany({}, {$inc: {"capacite": 100}})
 Permet d'ajouter 100 a la capacité des salles.
 
 ### Exo 15
-db.salles.updateMany({"styles": {\$ne: "jazz"}}, {\$push: {"styles": "jazz"}}) 
+db.salles.updateMany({"styles": {$ne: "jazz"}}, {$push: {"styles": "jazz"}}) 
 Permet d'ajouter le style "jazz" a toutes les salles
 
 ### Exo 16
-db.salles.updateMany({"_id": {\$nin: [2, 3]}, "styles": "funk"}, {\$pull: {"styles": "funk"}})
+db.salles.updateMany({"_id": {$nin: [2, 3]}, "styles": "funk"}, {$pull: {"styles": "funk"}})
 Permet de retirer le style funk aux salles dont l'id n'est ni 2 ni 3
 
 ### Exo 17
 db.salles.updateOne({"_id": 3}, {$addToSet: { "styles": { $each: ["techno", "reggae"] } }})
 Permet d'ajouter à la salle avec id 3 les styles techno et reggae.
 
-###
+### Exo 18
+
+db.salles.updateMany(
+    { nom: { $regex: /^p/i } },
+      { $inc: { capacite: 150 },
+      $push: { contact: {telephone: "04 11 94 00 10"} }
+    }
+)
+Permet d'ajouter aux salles commençant par p majuscule ou minuscule le tableau contact avec le document telephone et la valeur. Augmente la capacité des salles trouvées de 150
+
+### Exo 19
+db.salles.updateMany({name: {$regex: "^[aeiou]+$"}}, {$push: {avis: {date: new Date(), note: 10}}});
+
+Permet de trouver les salles commençant par des voyelles et d'ajouter une note de 10 a la date du jour.
+
+### Exo 20 
+
+db.collection.updateMany({ name: /^[zZ]/ }, {$set: {name: "Pub Z", capacity: 50, smac: false}}, {upsert: true})
+
+permet de trouver toutes les salles avec un nom commençant par z minuscule ou maj, changer leur nom à "Pub Z", changer leur capacité à 50 et passer smac en false.
+
+### Exo 21
+db.collection.aggregate([ {"$group": {"_id": {"$type": "objectId"},"count": {"$sum": 1}}}])
 
 
+### Exo 22
+
+db.salles.find().sort({capacity: -1}).limit(1).pretty()
+Permet d'afficher le nom de la salle ayant la plus grande capacité.
+
+### Exo 23
+
+### Index.md
+
+On peut créer un index sur les champs capacité et codePostal, on utilise createIndex pour le créer et dropIndex pour le détruire
+db.salles.createIndex({ "capacite": 1, "adresse.codePostal": 1 })
+db.salles.dropIndex({ "capacite": 1, "adresse.codePostal": 1 })
+
+### Validation.md
+
+Exercice 1
+
+Cette tentative d'insertion retournera une erreur car le champ codePostal est obligatoire et n'a pas été spécifié.
 
 # Lexique
 
@@ -100,48 +141,3 @@ Document : ensemble de données clé => valeur, très proche du js.
 Schéma : il est dynamique
 
 Collection : permet de stocker des documents de manière logique comme une table. schéma adaptable.
-
-
-
-
-
-
-> **Note:** The **Publish now** button is disabled if your file has not been published yet.
-> **ProTip:** You can disable any **Markdown extension** in the **File properties** dialog.
-
-
-## SmartyPants
-
-SmartyPants converts ASCII punctuation characters into "smart" typographic punctuation HTML entities. For example:
-
-|                |ASCII                          |HTML                         |
-|----------------|-------------------------------|-----------------------------|
-|Single backticks|`'Isn't this fun?'`            |'Isn't this fun?'            |
-|Quotes          |`"Isn't this fun?"`            |"Isn't this fun?"            |
-|Dashes          |`-- is en-dash, --- is em-dash`|-- is en-dash, --- is em-dash|
-
-## UML diagrams
-
-You can render UML diagrams using [Mermaid](https://mermaidjs.github.io/). For example, this will produce a sequence diagram:
-
-```mermaid
-sequenceDiagram
-Alice ->> Bob: Hello Bob, how are you?
-Bob-->>John: How about you John?
-Bob--x Alice: I am good thanks!
-Bob-x John: I am good thanks!
-Note right of John: Bob thinks a long<br/>long time, so long<br/>that the text does<br/>not fit on a row.
-
-Bob-->Alice: Checking with John...
-Alice->John: Yes... John, how are you?
-```
-
-And this will produce a flow chart:
-
-```mermaid
-graph LR
-A[Square Rect] -- Link text --> B((Circle))
-A --> C(Round Rect)
-B --> D{Rhombus}
-C --> D
-```
