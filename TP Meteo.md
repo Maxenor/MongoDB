@@ -49,8 +49,9 @@ db.collection.createIndex({datetime_utc: 1})
 
 Pour récupérer les index j'ai utilisé la commande getIndexes()
 
-![Resultat](./img/GetIndexes().png)
+![Resultat](./img/tp/GetIndexes().png)
 
+---
 
 Pour trouver toutes les stations dont la température a été supérieure à 25° entre les mois de juin et aout j'ai utilisé la commande:
 
@@ -60,6 +61,8 @@ db.delhi.find( { _tempm: { $gt: 25 }, datetime_utc: { $gte: ISODate('1996-06-01T
 On peut rajouter ``` .sort({ _pressurem: -1 }) ``` afin de trier les stations par la pression atmosphérique dans l'ordre décroissant
 
 ou utiliser ``` db.delhi.find().sort({_pressurem:-1}) ``` pour trier tous les documents.
+
+---
 
 Afin d'avoir une moyenne des températures par mois j'ai utilisé la commande : 
 
@@ -85,7 +88,9 @@ db.delhi.aggregate([
 ```
 Qui nous donne les résultats suivants :
 
-![Resultat](./img/AverageTemp.png)
+![Resultat](./img/tp/AverageTemp.png)
+
+---
 
 Afin de récuperer la station météorologique qui a enregistré la plus haute température en été j'ai utilisé la commande suivante : 
 
@@ -115,5 +120,34 @@ db.collection.aggregate([
 ```
 Elle permet de récupérer les stations avec une température enregistrée, de sélectionner la plus haute et d'en afficher une seule.
 
-![Resultat](./img/HottestTemp.png)
+![Resultat](./img/tp/HottestTemp.png)
+
+---
+
+Pour trouvez la station météorologique qui a enregistré la plus haute température en été, j'ai utilisé la requête suivante : 
+
+```
+db.delhi.aggregate([
+   {
+      $match: {
+         $expr: {
+            $in: [
+               {$month: "$datetime_utc"},
+               [6, 7, 8, 9]
+            ]
+         }
+      }
+   },
+   {
+      $group: {
+         _id: { $month: "$datetime_utc" },
+         maxi: {$max: "$_tempm"}
+      }
+   }
+])
+```
+Cependant suite a un problème la requête ne retourne que des strings vides.
+
+![Resultat](./img/tp/TempEté.png)
+
 
